@@ -195,3 +195,13 @@ a { color: inherit; text-decoration: none; }
 /* ---- diagrams ------------------------------------------------------------------------------------------------- */
 .layer { border: 1px solid var(--line); border-radius: 0.7rem; padding: 0.8rem 1rem; background: var(--bg-elevated); }
 .layer-core { border-color: var(--accent); background: var(--accent-soft); }
+
+/* ---- callouts (blockquotes in the docs) ------------------------------------------------------------------------ */
+.callout { margin: 1.3rem 0; padding: 0.9rem 1.1rem; border-radius: 0.7rem; border: 1px solid var(--line); border-left-width: 4px; background: var(--bg-elevated); color: var(--ink-soft); font-size: 0.95rem; }
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child { margin-bottom: 0; }
+.callout p { margin: 0.4rem 0; }
+.callout-note { border-left-color: var(--accent); background: var(--accent-soft); }
+.callout-tip { border-left-color: var(--ok); background: color-mix(in srgb, var(--ok) 9%, var(--bg-elevated)); }
+.callout-warning { border-left-color: var(--warn); background: color-mix(in srgb, var(--warn) 10%, var(--bg-elevated)); }
+.callout-design-rule { border-left-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 9%, var(--bg-elevated)); }

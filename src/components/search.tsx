@@ -68,6 +68,7 @@ function Palette({ onClose }: { onClose: () => void }) {
           }}
         />
         <div style={{ maxHeight: '55vh', overflowY: 'auto' }}>
+          {query && results.length > 0 ? <p className="label" style={{ padding: '0.7rem 1.2rem 0' }}>{results.length} matching sections · typos are fine</p> : null}
           {query && results.length === 0 ? <p className="label" style={{ padding: '1.2rem' }}>No matches</p> : null}
           {results.map((entry, position) => (
             <a

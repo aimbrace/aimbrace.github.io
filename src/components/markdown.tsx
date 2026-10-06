@@ -41,6 +41,19 @@ function CodeBlock({ children }: { children?: ReactNode }) {
   )
 }
 
+const KINDS = ['note', 'tip', 'warning', 'design rule'] as const
+
+/** A blockquote becomes a callout. A leading bold word (**Note**, **Tip**, **Warning**, **Design rule**) picks its colour. */
+function Callout({ children }: { children?: ReactNode }) {
+  const lead = textOf(children).trim().toLowerCase()
+  const kind = KINDS.find((candidate) => lead.startsWith(candidate)) ?? 'note'
+  return (
+    <aside className={`callout callout-${kind.replace(' ', '-')}`} role="note">
+      {children}
+    </aside>
+  )
+}
+
 /** Renders a docs page. `from` is the page's own path, so relative links resolve. */
 export function Markdown({ children, from }: { children: string; from: string }) {
   return (
@@ -60,6 +73,7 @@ export function Markdown({ children, from }: { children: string; from: string })
             )
           },
           pre: ({ children: inner }) => <CodeBlock>{inner}</CodeBlock>,
+          blockquote: ({ children: inner }) => <Callout>{inner}</Callout>,
           table: ({ children: rows }) => (
             <div className="table-wrap">
               <table>{rows}</table>

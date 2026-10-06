@@ -1,0 +1,108 @@
+{
+  "name": "examples/agent-cli",
+  "graph": {
+    "ok": true,
+    "nodes": [
+      {
+        "id": "model",
+        "version": "0.1.0",
+        "description": "Routes completions to registered model providers",
+        "requires": [],
+        "optional": [],
+        "provides": [
+          "ai.model"
+        ],
+        "index": 0
+      },
+      {
+        "id": "memory",
+        "version": "0.1.0",
+        "description": "In-process long-term memory",
+        "requires": [],
+        "optional": [],
+        "provides": [
+          "ai.memory"
+        ],
+        "index": 1
+      },
+      {
+        "id": "tools",
+        "version": "0.1.0",
+        "description": "Validates and runs registered tools",
+        "requires": [],
+        "optional": [],
+        "provides": [
+          "ai.tool-runner"
+        ],
+        "index": 2
+      },
+      {
+        "id": "model-mock",
+        "requires": [],
+        "optional": [],
+        "provides": [],
+        "index": 3
+      },
+      {
+        "id": "tools-builtin",
+        "requires": [],
+        "optional": [],
+        "provides": [],
+        "index": 4
+      },
+      {
+        "id": "agent",
+        "version": "0.1.0",
+        "description": "Tool-using agent with a scope per task",
+        "requires": [
+          "ai.model",
+          "ai.memory",
+          "ai.tool-runner"
+        ],
+        "optional": [],
+        "provides": [
+          "ai.agent"
+        ],
+        "index": 5
+      },
+      {
+        "id": "ask",
+        "requires": [],
+        "optional": [],
+        "provides": [],
+        "index": 6
+      }
+    ],
+    "edges": [
+      {
+        "from": "model",
+        "to": "agent",
+        "service": "ai.model",
+        "optional": false
+      },
+      {
+        "from": "memory",
+        "to": "agent",
+        "service": "ai.memory",
+        "optional": false
+      },
+      {
+        "from": "tools",
+        "to": "agent",
+        "service": "ai.tool-runner",
+        "optional": false
+      }
+    ],
+    "order": [
+      "model",
+      "memory",
+      "tools",
+      "model-mock",
+      "tools-builtin",
+      "agent",
+      "ask"
+    ],
+    "diagnostics": []
+  },
+  "mermaid": "flowchart TD\n  p_model[\"model v0.1.0\"]\n  p_memory[\"memory v0.1.0\"]\n  p_tools[\"tools v0.1.0\"]\n  p_model_mock[\"model-mock\"]\n  p_tools_builtin[\"tools-builtin\"]\n  p_agent[\"agent v0.1.0\"]\n  p_ask[\"ask\"]\n  p_model -->|ai.model| p_agent\n  p_memory -->|ai.memory| p_agent\n  p_tools -->|ai.tool-runner| p_agent\n"
+}

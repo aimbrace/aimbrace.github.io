@@ -5,14 +5,8 @@ import { depths, eventFor, type GraphData, initial, type Simulation, statusOf, s
 
 const graph = agent.graph as GraphData
 
-/**
- * Plugins that contribute to a *registry* (not a service). The graph has no edge for these, which is the point: contributors are
- * not dependencies. Names are the example's own; the registry ids are from the plugin packages.
- */
-const CONTRIBUTIONS: Record<string, { to: string; registry: string }> = {
-  'model-mock': { to: 'model', registry: 'ai.model-providers' },
-  'tools-builtin': { to: 'tools', registry: 'ai.tools' },
-}
+/** Registry contributions are not a concept of the plugin library, so there are none to draw. */
+const CONTRIBUTIONS: Record<string, { to: string; registry: string }> = {}
 
 const W = 176
 const H = 46
@@ -141,7 +135,7 @@ export function GraphExplorer({ compact = false }: { compact?: boolean }) {
         <span className="pill" aria-live="polite">
           app: {sim.phase}
         </span>
-        <span className="label" style={{ marginLeft: 'auto' }}>real graph of examples/agent-cli</span>
+        <span className="label" style={{ marginLeft: 'auto' }}>the agent template's plugins</span>
       </div>
 
       <div style={{ overflowX: 'auto', paddingBottom: '0.3rem' }}>
@@ -163,7 +157,7 @@ export function GraphExplorer({ compact = false }: { compact?: boolean }) {
             const state = statusOf(graph, sim, placed.id)
             const color = COLORS[state]
             const meta = graph.nodes.find((candidate) => candidate.id === placed.id)
-            const subtitle = CONTRIBUTIONS[placed.id] ? `adds to ${CONTRIBUTIONS[placed.id]?.registry}` : meta?.provides.length ? `provides ${meta.provides.join(', ')}` : 'contributes a command'
+            const subtitle = CONTRIBUTIONS[placed.id] ? `adds to ${CONTRIBUTIONS[placed.id]?.registry}` : meta?.provides.length ? `provides ${meta.provides.join(', ')}` : meta?.requires.length ? `needs ${meta.requires.join(', ')}` : 'no service'
             return (
               <g
                 key={placed.id}
@@ -191,8 +185,7 @@ export function GraphExplorer({ compact = false }: { compact?: boolean }) {
         </svg>
       </div>
       <p className="label" style={{ margin: '0.4rem 0 1rem', textTransform: 'none', letterSpacing: 0 }}>
-        Solid lines are dependencies (required services). Dashed lines are registry contributions, which are not dependencies. Install order is shown;
-        each plugin is then started in the same order, and stopped and disposed in reverse.
+        Lines are injected services: the arrow runs from the plugin that provides a service to the plugin that needs it. Plugins start in this order and are stopped and disposed in reverse.
       </p>
 
       <div style={{ display: 'grid', gap: '1.2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(16rem, 1fr))' }}>
@@ -227,7 +220,7 @@ export function GraphExplorer({ compact = false }: { compact?: boolean }) {
           ) : null}
         </div>
         <div>
-          <div className="label" style={{ marginBottom: '0.4rem' }}>hooks fired</div>
+          <div className="label" style={{ marginBottom: '0.4rem' }}>events</div>
           <div style={{ minHeight: '7.5rem', maxHeight: '11rem', overflowY: 'auto', borderLeft: '2px solid var(--line)', paddingLeft: '0.8rem' }} aria-live="polite">
             {log.length === 0 ? <div className="log-line" style={{ color: 'var(--ink-mute)' }}>Press Start.</div> : null}
             {log.map((line, index) => (

@@ -1,9 +1,9 @@
 # aimbrace.github.io
 
-The website for [AIMBRACE](https://github.com/aimbrace/aimbrace): an explainer, the live plugin graph, and the documentation.
+The website for [AIMBRACE](https://github.com/aimbrace/aimbrace): an explainer, the agent template's plugin graph, and the documentation.
 
-The documentation and the graph are **copied** from the framework repository by `pnpm run sync` (default source: `../aimbrace`, which must be
-built). The copies are committed, so the site builds on its own. Re-run the sync after changing the docs there.
+The documentation and the graph are **copied** from the framework repository by `pnpm run sync` (default source: `../aimbrace`; nothing
+needs building there). The copies are committed, so the site builds on its own. Re-run the sync after changing the docs there.
 
 ```sh
 pnpm install

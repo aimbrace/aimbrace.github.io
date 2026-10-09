@@ -11,15 +11,14 @@ export default function DocsIndex() {
           <div className="label label-accent">documentation</div>
           <h1 className="section-title" style={{ fontSize: 'clamp(2.2rem, 4.4vw, 3.4rem)' }}>Everything, in the order you need it.</h1>
           <p className="section-lede">
-            Start with the quickstart, then the overview. Every snippet marked as runnable is executed by the framework's test suite, every link is checked, and every export
-            of every package is in its reference page.
+            Start with getting started, then the plugin library. The documented extension contract is installed by the framework's test suite, every Cordis example is run against the pinned Cordis, and every link is checked.
           </p>
           <div style={{ display: 'flex', gap: '0.7rem', marginTop: '1.6rem', flexWrap: 'wrap' }}>
-            <Link to="/docs/getting-started/quickstart" className="btn btn-primary">
-              Quickstart <ArrowRight size={15} />
+            <Link to="/docs/getting-started" className="btn btn-primary">
+              Getting started <ArrowRight size={15} />
             </Link>
-            <Link to="/docs/concepts/overview" className="btn">
-              Overview
+            <Link to="/docs/plugins" className="btn">
+              The plugin library
             </Link>
           </div>
         </div>

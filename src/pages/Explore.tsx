@@ -7,10 +7,9 @@ export default function Explore() {
       <div className="grid-bg" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="container-x" style={{ padding: '3.4rem 1.25rem 2.6rem' }}>
           <div className="label label-accent">explore</div>
-          <h1 className="section-title">Watch the lifecycle happen.</h1>
+          <h1 className="section-title">Watch the plugins start, stop and wait.</h1>
           <p className="section-lede">
-            This is the agent example's real plugin graph, exported by the framework's CLI. Start the app to see plugins install in dependency order, remove a
-            provider to watch its dependents go pending, and stop to see reverse teardown.
+            This is the agent template's real plugin graph, read from each plugin's own list of the services it provides and injects. Start the app to see plugins start in dependency order, remove a provider to watch its dependents go pending (Cordis keeps them waiting and starts them again when it returns), and stop to see reverse teardown.
           </p>
         </div>
       </div>

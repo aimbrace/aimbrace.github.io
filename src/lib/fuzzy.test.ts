@@ -43,16 +43,16 @@ describe('fuzzy search over the docs', () => {
   const index = buildIndex()
 
   it('finds a section despite a typo in the query', () => {
-    const results = search(index, 'lifecyle stop', 5)
-    expect(results.map((entry) => entry.page)).toContain('concepts/lifecycle.md')
+    const results = search(index, 'extentions rollbak', 5)
+    expect(results.map((entry) => entry.page)).toContain('extending-apps.md')
   })
 
   it('finds an API name with a typo', () => {
-    expect(search(index, 'definplugin', 5).length).toBeGreaterThan(0)
+    expect(search(index, 'restoredPrevius', 5).length).toBeGreaterThan(0)
   })
 
   it('still ranks exact heading matches first', () => {
-    expect(search(index, 'dependency graph')[0]?.page).toBe('concepts/dependency-graph.md')
+    expect(search(index, 'the lock')[0]?.page).toBe('manifest.md')
   })
 
   it('returns nothing for nonsense and for an empty query', () => {

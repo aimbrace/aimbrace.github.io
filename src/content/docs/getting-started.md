@@ -1,0 +1,78 @@
+# Getting started
+
+You need Node 22.18 or newer (Node runs the TypeScript directly, with no build step) and npm. Git, to save your app.
+
+## Create an app
+
+From a checkout of this repository:
+
+```sh
+pnpm install && pnpm run build        # once: the aimbrace command itself
+node packages/cli/bin/aimbrace.js init ../my-app --agent -y
+cd ../my-app
+npm install
+npm run dev                           # prints its URL; the app's data lives in .aimbrace/
+```
+
+`init` never writes into a directory that is not empty. Without `--agent` you get the smaller `app` template.
+
+| Template | Plugins | What it is |
+|---|---|---|
+| `app` | `instance`, `http`, `server`, `manifest`, `save` | a Cordis app that serves routes |
+| `agent` | the above plus `tasks`, `agent`, `extensions`, `builder` | the same, with an offline agent that can extend the app while it runs |
+
+Every generated app is TypeScript, has `npm test` (`node:test`) and `npm run check` (types), and depends at run time on
+`@deepseek-ai/cordis` and `yaml` (plus `@deepseek-ai/schemastery` if you add `settings`).
+
+## Try the agent
+
+```sh
+curl -X POST <url>/ask -H 'content-type: application/json' -d '{"question":"create route hello /hello Hello"}'
+# {"status":"completed","output":"hello: installed, active.", ...}
+curl <url>/hello            # {"text":"Hello"}
+curl <url>/tasks            # the run, as a durable task that owns its tool calls
+```
+
+Give it a real model (any OpenAI-compatible API) and describe what you want instead:
+
+```sh
+AIMBRACE_MODEL_URL=http://127.0.0.1:11434/v1 AIMBRACE_MODEL=qwen2.5-coder npm run dev    # or a hosted API with AIMBRACE_MODEL_KEY
+curl -X POST <url>/ask -H 'content-type: application/json' -d '{"question":"add a GET /time route that returns the time"}'
+```
+
+Either way the agent wrote a Cordis plugin into `extensions/hello/`, installed it into the running app, and checked that its route
+answers before reporting it live. See [Extending a running app](extending-apps.md).
+
+## Add plugins
+
+```sh
+node <aimbrace>/packages/cli/bin/aimbrace.js plugins             # the library
+node <aimbrace>/packages/cli/bin/aimbrace.js add settings        # copy one into this app, with what it requires
+npm install                                                       # new dependencies, if it added any
+```
+
+Then mount it: add it to the registry in `src/app.ts` and a row in `aimbrace.yaml`. See [The plugin library](plugins.md).
+
+## Lock and save
+
+```sh
+npm run lock                 # aimbrace.lock.json: what the app is built from, with digests
+npm run save -- "add hello"  # git commit (and push, if there is a remote)
+```
+
+`save` refuses a file that looks like it holds a secret, and refuses to push an app that is not `visibility: public` to a
+public remote. Nothing is committed when it refuses.
+
+## Where things live
+
+| Path | What |
+|---|---|
+| `aimbrace.yaml` | the app as data: plugin rows, config, parameters ([manifest](manifest.md)) |
+| `src/app.ts` | the registry of plugins your code provides; mounts the manifest |
+| `src/routes.ts` | your own plugin |
+| `src/plugins/` | plugins copied from the library; yours to edit |
+| `extensions/` | plugins installed while the app runs (`agent` template); part of your app |
+| `.aimbrace/` | the app's data: settings, installed-extension state, the extension ledger, task records (not committed) |
+
+Set `AIMBRACE_HOME` to keep the data elsewhere and `AIMBRACE_PORT` to choose the first port tried (`0` for any free port).
+Nothing else reads the environment.

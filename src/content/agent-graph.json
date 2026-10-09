@@ -1,108 +1,192 @@
 {
-  "name": "examples/agent-cli",
+  "name": "the agent template",
   "graph": {
     "ok": true,
     "nodes": [
       {
-        "id": "model",
-        "version": "0.1.0",
-        "description": "Routes completions to registered model providers",
+        "id": "instance",
+        "description": "Where the app keeps things (home, port, run lock), chosen once from the environment or the project folder.",
         "requires": [],
         "optional": [],
         "provides": [
-          "ai.model"
+          "appInstance"
         ],
         "index": 0
       },
       {
-        "id": "memory",
-        "version": "0.1.0",
-        "description": "In-process long-term memory",
+        "id": "http",
+        "description": "The router service: plugins add routes inside ctx.effect, so a route disappears with the plugin that added it.",
         "requires": [],
         "optional": [],
         "provides": [
-          "ai.memory"
+          "http"
         ],
         "index": 1
       },
       {
-        "id": "tools",
-        "version": "0.1.0",
-        "description": "Validates and runs registered tools",
-        "requires": [],
+        "id": "server",
+        "description": "Serves the http router over node:http; moves to the next free port when asked; closes on stop.",
+        "requires": [
+          "http"
+        ],
         "optional": [],
         "provides": [
-          "ai.tool-runner"
+          "server"
         ],
         "index": 2
       },
       {
-        "id": "model-mock",
-        "requires": [],
+        "id": "tasks",
+        "description": "Durable task records: id, owner, input, status, result, trace; appended to a log in the app's home and readable after a restart.",
+        "requires": [
+          "appInstance"
+        ],
         "optional": [],
-        "provides": [],
+        "provides": [
+          "tasks"
+        ],
         "index": 3
       },
       {
-        "id": "tools-builtin",
+        "id": "openai",
+        "description": "A real model for the agent: any OpenAI-compatible chat API (OpenAI, DeepSeek, Ollama, LM Studio) over fetch, with tool calls. No SDK.",
         "requires": [],
         "optional": [],
-        "provides": [],
+        "provides": [
+          "model"
+        ],
         "index": 4
       },
       {
         "id": "agent",
-        "version": "0.1.0",
-        "description": "Tool-using agent with a scope per task",
+        "description": "An offline agent: deterministic model, tools, memory, and a child fiber per run that holds the run's step budget.",
         "requires": [
-          "ai.model",
-          "ai.memory",
-          "ai.tool-runner"
+          "model",
+          "tools",
+          "memory"
         ],
         "optional": [],
         "provides": [
-          "ai.agent"
+          "agent",
+          "model",
+          "tools",
+          "memory"
         ],
         "index": 5
       },
       {
-        "id": "ask",
+        "id": "digest",
+        "description": "A content digest of a folder (file names and bytes), shared by extensions (staging) and manifest (the lock).",
         "requires": [],
         "optional": [],
         "provides": [],
         "index": 6
+      },
+      {
+        "id": "extensions",
+        "description": "Install, update, remove and reload plugins while the app runs; a failed update brings the previous version back; a ledger of every change.",
+        "requires": [
+          "appInstance"
+        ],
+        "optional": [],
+        "provides": [
+          "extensions"
+        ],
+        "index": 7
+      },
+      {
+        "id": "builder",
+        "description": "The agent's tools for building the app it runs in: write, install, read, list and remove extensions, with real results.",
+        "requires": [
+          "extensions",
+          "tools",
+          "appInstance"
+        ],
+        "optional": [],
+        "provides": [],
+        "index": 8
+      },
+      {
+        "id": "manifest",
+        "description": "The app as data: aimbrace.yaml lists ordered plugin rows with config, parameters and on/off switches; validated, composed and locked.",
+        "requires": [],
+        "optional": [],
+        "provides": [],
+        "index": 9
+      },
+      {
+        "id": "save",
+        "description": "Save the app to its own git repository: refuses a file that holds a secret, and a private app going to a public remote.",
+        "requires": [
+          "appInstance"
+        ],
+        "optional": [],
+        "provides": [],
+        "index": 10
       }
     ],
     "edges": [
       {
-        "from": "model",
-        "to": "agent",
-        "service": "ai.model",
+        "from": "http",
+        "to": "server",
+        "service": "http",
         "optional": false
       },
       {
-        "from": "memory",
-        "to": "agent",
-        "service": "ai.memory",
+        "from": "instance",
+        "to": "tasks",
+        "service": "appInstance",
         "optional": false
       },
       {
-        "from": "tools",
+        "from": "openai",
         "to": "agent",
-        "service": "ai.tool-runner",
+        "service": "model",
+        "optional": false
+      },
+      {
+        "from": "instance",
+        "to": "extensions",
+        "service": "appInstance",
+        "optional": false
+      },
+      {
+        "from": "extensions",
+        "to": "builder",
+        "service": "extensions",
+        "optional": false
+      },
+      {
+        "from": "agent",
+        "to": "builder",
+        "service": "tools",
+        "optional": false
+      },
+      {
+        "from": "instance",
+        "to": "builder",
+        "service": "appInstance",
+        "optional": false
+      },
+      {
+        "from": "instance",
+        "to": "save",
+        "service": "appInstance",
         "optional": false
       }
     ],
     "order": [
-      "model",
-      "memory",
-      "tools",
-      "model-mock",
-      "tools-builtin",
+      "instance",
+      "http",
+      "server",
+      "tasks",
+      "openai",
       "agent",
-      "ask"
-    ],
-    "diagnostics": []
-  },
-  "mermaid": "flowchart TD\n  p_model[\"model v0.1.0\"]\n  p_memory[\"memory v0.1.0\"]\n  p_tools[\"tools v0.1.0\"]\n  p_model_mock[\"model-mock\"]\n  p_tools_builtin[\"tools-builtin\"]\n  p_agent[\"agent v0.1.0\"]\n  p_ask[\"ask\"]\n  p_model -->|ai.model| p_agent\n  p_memory -->|ai.memory| p_agent\n  p_tools -->|ai.tool-runner| p_agent\n"
+      "digest",
+      "extensions",
+      "builder",
+      "manifest",
+      "save"
+    ]
+  }
 }

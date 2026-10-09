@@ -4,8 +4,8 @@ import { buildIndex, search } from './search'
 
 describe('docs', () => {
   it('reads the navigation from the docs index and every entry has a page', () => {
-    expect(nav.map((group) => group.title)).toEqual(['Getting started', 'Concepts', 'Guides', 'Reference', 'Architecture', 'Project'])
-    expect(flat.length).toBeGreaterThan(25)
+    expect(nav.map((group) => group.title)).toEqual(['Documentation'])
+    expect(flat.map((item) => item.path)).toEqual(['getting-started.md', 'plugins.md', 'extending-apps.md', 'manifest.md', 'cordis.md'])
     for (const item of flat) expect(pages[item.path], item.path).toBeDefined()
   })
 
@@ -16,9 +16,9 @@ describe('docs', () => {
   })
 
   it('maps pages to routes and back', () => {
-    expect(routeOf('concepts/plugins.md')).toBe('/docs/concepts/plugins')
-    expect(pathOfRoute('concepts/plugins')).toBe('concepts/plugins.md')
-    expect(pathOfRoute('concepts/nope')).toBeUndefined()
+    expect(routeOf('extending-apps.md')).toBe('/docs/extending-apps')
+    expect(pathOfRoute('extending-apps')).toBe('extending-apps.md')
+    expect(pathOfRoute('nope')).toBeUndefined()
   })
 
   it('slugs headings like rehype-slug and skips code fences', () => {
@@ -33,11 +33,10 @@ describe('docs', () => {
   })
 
   it('rewrites links: docs pages to the site, everything else to the repository', () => {
-    expect(resolveLink('#anchor', 'concepts/plugins.md')).toEqual({ kind: 'anchor', href: '#anchor' })
-    expect(resolveLink('../guides/errors.md#codes', 'concepts/plugins.md')).toEqual({ kind: 'internal', href: '/docs/guides/errors#codes' })
-    expect(resolveLink('lifecycle.md', 'concepts/plugins.md').href).toBe('/docs/concepts/lifecycle')
-    expect(resolveLink('https://example.com', 'status.md')).toEqual({ kind: 'external', href: 'https://example.com' })
-    expect(resolveLink('../aimbrace_spec.md', 'getting-started/installation.md').href).toBe('https://github.com/aimbrace/aimbrace/blob/main/docs/aimbrace_spec.md')
+    expect(resolveLink('#anchor', 'plugins.md')).toEqual({ kind: 'anchor', href: '#anchor' })
+    expect(resolveLink('manifest.md#the-lock', 'plugins.md')).toEqual({ kind: 'internal', href: '/docs/manifest#the-lock' })
+    expect(resolveLink('https://example.com', 'plugins.md')).toEqual({ kind: 'external', href: 'https://example.com' })
+    expect(resolveLink('../specs/000-roadmap/spec.md', 'plugins.md').href).toBe('https://github.com/aimbrace/aimbrace/blob/main/specs/000-roadmap/spec.md')
   })
 })
 
@@ -45,19 +44,19 @@ describe('search', () => {
   const index = buildIndex()
 
   it('indexes sections with anchors', () => {
-    expect(index.length).toBeGreaterThan(100)
+    expect(index.length).toBeGreaterThan(30)
     expect(index.every((entry) => entry.href.startsWith('/docs/'))).toBe(true)
   })
 
   it('finds pages by heading, with all words matching', () => {
-    const results = search(index, 'dependency graph')
-    expect(results[0]?.page).toBe('concepts/dependency-graph.md')
+    const results = search(index, 'durable task records')
+    expect(results[0]?.page).toBe('plugins.md')
     expect(search(index, 'zzzzqqq')).toEqual([])
     expect(search(index, '')).toEqual([])
   })
 
   it('finds an API by name', () => {
-    expect(search(index, 'definePlugin').length).toBeGreaterThan(0)
-    expect(search(index, 'E_MISSING_DEPENDENCY', 20).map((entry) => entry.page)).toContain('guides/errors.md')
+    expect(search(index, 'package_plugin').length).toBeGreaterThan(0)
+    expect(search(index, 'restoredPrevious', 20).map((entry) => entry.page)).toContain('extending-apps.md')
   })
 })

@@ -9,7 +9,7 @@ const links = [
   { to: '/', label: 'Home', end: true },
   { to: '/docs', label: 'Docs' },
   { to: '/explore', label: 'Explore' },
-  { to: '/docs/status', label: 'Status' },
+  { to: '/docs/plugins', label: 'Plugins' },
 ]
 
 export function Logo({ size = 30 }: { size?: number }) {
@@ -46,7 +46,7 @@ export function SiteHeader() {
         <a href={REPOSITORY} className="btn btn-sm hidden sm:inline-flex" target="_blank" rel="noreferrer">
           GitHub <ArrowUpRight size={12} />
         </a>
-        <Link to="/docs/getting-started/quickstart" className="btn btn-sm btn-primary">
+        <Link to="/docs/getting-started" className="btn btn-sm btn-primary">
           Quickstart
         </Link>
       </div>
@@ -62,19 +62,17 @@ export function SiteFooter() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontWeight: 800, letterSpacing: '0.12em', fontSize: '0.82rem' }}>
             <Logo size={26} /> AIMBRACE
           </div>
-          <p style={{ color: 'var(--ink-mute)', fontSize: '0.85rem', maxWidth: '18rem' }}>A TypeScript application composition runtime, built on Cordis. MIT licensed.</p>
+          <p style={{ color: 'var(--ink-mute)', fontSize: '0.85rem', maxWidth: '18rem' }}>A library of Cordis plugins extracted from ACRYL, copied into your app. MIT licensed.</p>
         </div>
         <FooterColumn title="Learn">
-          <Link to="/docs/getting-started/quickstart">Quickstart</Link>
-          <Link to="/docs/concepts/overview">Overview</Link>
-          <Link to="/docs/guides/ai-agents">AI agents</Link>
-          <Link to="/explore">Explore the graph</Link>
+          <Link to="/docs/getting-started">Getting started</Link>
+          <Link to="/docs/extending-apps">Extending a running app</Link>
+          <Link to="/docs/manifest">The app manifest</Link>
+          <Link to="/explore">Explore the plugins</Link>
         </FooterColumn>
         <FooterColumn title="Reference">
-          <Link to="/docs/reference/core">@aimbrace/core</Link>
-          <Link to="/docs/guides/errors">Error catalogue</Link>
-          <Link to="/docs/architecture/decisions">Decisions</Link>
-          <Link to="/docs/status">Status</Link>
+          <Link to="/docs/plugins">The plugin library</Link>
+          <Link to="/docs/cordis">Building with Cordis</Link>
         </FooterColumn>
         <FooterColumn title="Project">
           <a href={REPOSITORY}>GitHub</a>

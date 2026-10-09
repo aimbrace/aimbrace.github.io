@@ -5,11 +5,13 @@ import { depths, type GraphData, initial, statusOf, step } from './simulation'
 const graph = agent.graph as GraphData
 const statuses = (sim: ReturnType<typeof step>) => Object.fromEntries(graph.order.map((id) => [id, statusOf(graph, sim, id)]))
 
-describe('lifecycle simulation over the real agent graph', () => {
-  it('uses the graph the framework exports', () => {
+describe('lifecycle simulation over the real agent template graph', () => {
+  it('uses the graph read from the framework', () => {
     expect(graph.ok).toBe(true)
-    expect(graph.order.at(-1)).toBe('ask')
-    expect(graph.order.indexOf('model')).toBeLessThan(graph.order.indexOf('agent'))
+    expect(graph.order).toHaveLength(11)
+    expect(graph.order.indexOf('instance')).toBe(0)
+    expect(graph.order.indexOf('openai')).toBeLessThan(graph.order.indexOf('agent'))
+    expect(graph.order.indexOf('extensions')).toBeLessThan(graph.order.indexOf('builder'))
   })
 
   it('installs in dependency order and ends running', () => {
@@ -37,24 +39,25 @@ describe('lifecycle simulation over the real agent graph', () => {
 
   it('sends dependents of a removed provider to pending, and brings them back', () => {
     const running = { phase: 'running', cursor: graph.order.length, removed: [] } as ReturnType<typeof step>
-    const removed = step(graph, running, { type: 'remove', id: 'model' })
+    const removed = step(graph, running, { type: 'remove', id: 'extensions' })
     const after = statuses(removed)
-    expect(after.model).toBe('removed')
-    expect(after.agent).toBe('pending')
-    expect(after.memory).toBe('running')
-    const restored = step(graph, removed, { type: 'restore', id: 'model' })
+    expect(after.extensions).toBe('removed')
+    expect(after.builder).toBe('pending')
+    expect(after.server).toBe('running')
+    const restored = step(graph, removed, { type: 'restore', id: 'extensions' })
     expect(Object.values(statuses(restored)).every((s) => s === 'running')).toBe(true)
   })
 
   it('ignores actions that make no sense in the current phase', () => {
     expect(step(graph, initial, { type: 'stop' })).toBe(initial)
-    expect(step(graph, initial, { type: 'remove', id: 'model' })).toBe(initial)
+    expect(step(graph, initial, { type: 'remove', id: 'extensions' })).toBe(initial)
     expect(step(graph, step(graph, initial, { type: 'start' }), { type: 'start' }).phase).toBe('starting')
   })
 
   it('layers the diagram by dependency depth', () => {
     const layers = depths(graph)
-    expect(layers.model).toBe(0)
-    expect(layers.agent).toBe(1)
+    expect(layers.instance).toBe(0)
+    expect(layers.extensions).toBe(1)
+    expect(layers.builder).toBe(2)
   })
 })

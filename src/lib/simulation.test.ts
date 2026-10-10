@@ -8,7 +8,7 @@ const statuses = (sim: ReturnType<typeof step>) => Object.fromEntries(graph.orde
 describe('lifecycle simulation over the real agent template graph', () => {
   it('uses the graph read from the framework', () => {
     expect(graph.ok).toBe(true)
-    expect(graph.order).toHaveLength(11)
+    expect(graph.order).toHaveLength(13)
     expect(graph.order.indexOf('instance')).toBe(0)
     expect(graph.order.indexOf('openai')).toBeLessThan(graph.order.indexOf('agent'))
     expect(graph.order.indexOf('extensions')).toBeLessThan(graph.order.indexOf('builder'))

@@ -24,6 +24,16 @@
         "index": 1
       },
       {
+        "id": "events",
+        "description": "A live stream of Cordis events over server-sent events, so a surface renders state instead of polling.",
+        "requires": [
+          "http"
+        ],
+        "optional": [],
+        "provides": [],
+        "index": 2
+      },
+      {
         "id": "server",
         "description": "Serves the http router over node:http; moves to the next free port when asked; closes on stop.",
         "requires": [
@@ -33,7 +43,7 @@
         "provides": [
           "server"
         ],
-        "index": 2
+        "index": 3
       },
       {
         "id": "tasks",
@@ -45,7 +55,7 @@
         "provides": [
           "tasks"
         ],
-        "index": 3
+        "index": 4
       },
       {
         "id": "openai",
@@ -55,7 +65,7 @@
         "provides": [
           "model"
         ],
-        "index": 4
+        "index": 5
       },
       {
         "id": "agent",
@@ -72,7 +82,17 @@
           "tools",
           "memory"
         ],
-        "index": 5
+        "index": 6
+      },
+      {
+        "id": "sandbox",
+        "description": "Run untrusted code (agent-written tools) in a child process under Node's permission model: read only its own folder, no child processes, no env, time and memory limits.",
+        "requires": [],
+        "optional": [],
+        "provides": [
+          "sandbox"
+        ],
+        "index": 7
       },
       {
         "id": "digest",
@@ -80,7 +100,7 @@
         "requires": [],
         "optional": [],
         "provides": [],
-        "index": 6
+        "index": 8
       },
       {
         "id": "extensions",
@@ -92,7 +112,7 @@
         "provides": [
           "extensions"
         ],
-        "index": 7
+        "index": 9
       },
       {
         "id": "builder",
@@ -104,15 +124,15 @@
         ],
         "optional": [],
         "provides": [],
-        "index": 8
+        "index": 10
       },
       {
         "id": "manifest",
-        "description": "The app as data: aimbrace.yaml lists ordered plugin rows with config, parameters and on/off switches; validated, composed and locked.",
+        "description": "The app as data: blend.yaml lists ordered plugin rows with config, parameters and on/off switches; validated, composed and locked.",
         "requires": [],
         "optional": [],
         "provides": [],
-        "index": 9
+        "index": 11
       },
       {
         "id": "save",
@@ -122,10 +142,16 @@
         ],
         "optional": [],
         "provides": [],
-        "index": 10
+        "index": 12
       }
     ],
     "edges": [
+      {
+        "from": "http",
+        "to": "events",
+        "service": "http",
+        "optional": false
+      },
       {
         "from": "http",
         "to": "server",
@@ -178,10 +204,12 @@
     "order": [
       "instance",
       "http",
+      "events",
       "server",
       "tasks",
       "openai",
       "agent",
+      "sandbox",
       "digest",
       "extensions",
       "builder",

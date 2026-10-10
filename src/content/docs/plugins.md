@@ -11,9 +11,11 @@ against a real Cordis context, including disposal.
 | [settings](#settings) | `settings` | `plugins/acryl-settings` |
 | [extensions](#extensions) | `extensions` | `plugins/acryl-extension-context` |
 | [builder](#builder) | tools for the agent | the agent's install tools |
+| [sandbox](#sandbox) | `sandbox` | - |
 | [agent](#agent) | `agent`, `model`, `tools`, `memory` | - |
 | [openai](#openai) | `model` (a real one) | - |
 | [tasks](#tasks) | `tasks` | idea from Pi Durable |
+| [events](#events) | a route | idea from Pi Durable |
 | [manifest](#manifest) | functions, no service | `runtime/blends-core` |
 | [save](#save) | a tool for the agent | `runtime/app-persistence` |
 | [digest](#digest) | a function | - |
@@ -44,6 +46,14 @@ Install, update, remove and reload Cordis plugins while the app runs: `ctx.exten
 `reload()`, `list()`, `pending()`, `ledger()`. A failed update brings the previous version back. Config: `{ sources: [{
 dir, trust: 'install' | 'list' }] }`. Details in [Extending a running app](extending-apps.md).
 
+## sandbox
+
+`ctx.sandbox.run(entry, input, { timeoutMs, memoryMb, read })` runs a file that exports `run(input)` in a separate Node process
+under the permission model (`node --permission`): it can read only its own folder; it cannot write files, start processes or
+workers, or load native addons; it gets an empty environment; it is killed after a time limit and capped in memory and output.
+It never throws: failures are results (`denied`, `timeout`, `output`, `crash`, `error`). **It does not block the network**: Node 24
+has no network permission, so restrict egress outside the process where that matters.
+
 ## builder
 
 Gives the agent tools over Extensions: `list_plugins`, `read_plugin`, `write_plugin`, `install_plugin`, `remove_plugin`.
@@ -68,13 +78,26 @@ extension contract. In the `agent` template, set `AIMBRACE_MODEL_URL`, `AIMBRACE
 
 ## tasks
 
+Records live in a store behind a small interface (`load`, `append`, `close`): a JSON lines file by default, or a SQLite file
+(`store: sqlite`, using Node's built-in `node:sqlite`, with full-durability writes). Both pass the same conformance suite, and the
+whole tasks test file runs against each. In the agent template this is the `taskStore` parameter of `blend.yaml`.
+
 Durable task records: `ctx.tasks.start(kind, input, { parent })` returns a handle with `complete`, `fail`, `progress` and
 an abort `signal`. Every change is appended to `<home>/tasks.jsonl` before the call returns. `cancel(id)` cancels the
 tasks it owns too. After a crash, a task that was running is marked `interrupted` and is never run again on its own,
 because a side effect may already have happened. When `tasks` is mounted, every agent run is a task owning one task per
 tool call.
 
+## events
+
+`GET /events` as a stream of server-sent events. Config: `{ topics: ['tasks/changed', 'extensions/changed'], path }`. The SSE event
+name is the Cordis event, the data is `{ "args": [...] }`, ids rise, a keepalive comment goes out every 15 s, and a connection's
+listeners are removed when the client leaves. Any route can answer with a stream: return `{ body: null, stream: (send) => cleanup }`
+from a route handler. A surface renders this stream instead of polling `GET /tasks`.
+
 ## manifest
+
+Reads and validates `blend.yaml`, ACRYL's Blend format (a Blueprint with rows and parameters; inheritance is reported as `unsupported`).
 
 `loadManifest(file, { known, values })`, `validate(document, known)`, `compose(root, manifest, registry, overrides)`,
 `lock(manifest, sources)`, and `npm run lock`. See [The app manifest](manifest.md).

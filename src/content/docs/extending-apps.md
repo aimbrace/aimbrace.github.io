@@ -53,6 +53,30 @@ always structured:
 
 `state` is the plugin's real Cordis state: `active`, `pending` (with `missing`: the services it waits for) or `failed`.
 
+## Plugins and tools: two levels of trust
+
+A **plugin** (`index.ts` exporting `apply`) is trusted code: it runs inside the app with the app's permissions, so you gate it
+with approval. A **tool** is code you do not trust, such as a function an agent just wrote: it never runs inside the app.
+
+A tool is a folder with two files, `index.ts` exporting `run(input)` and `tool.json`:
+
+```json
+{ "description": "Multiply a number by 3: input { n }.", "examples": [{ "input": { "n": 2 }, "output": { "n": 6 } }] }
+```
+
+Installing it registers an agent tool whose every call runs in the [sandbox](plugins.md#sandbox). Its `examples` are the
+install's self-check: they run in the sandbox, must match exactly, and a tool without examples is refused. A tool that tries to
+read outside its folder is denied by the sandbox, fails its own example, and is never installed. Updates and rollback work as for
+plugins. Scripted-model commands: `create tool <name> <factor>`, `run tool <name> <n>`, `spy tool <name>` (shows the refusal).
+
+## Approval
+
+Set `approval: true` in `blend.yaml` (a parameter on the `extensions` row) and an install does not run until the owner
+decides. The install answers `stage: "approval"`, the request is written to the ledger, and nothing is installed. The owner
+reads `GET /extensions` (`waitingForApproval`) and answers `POST /extensions/approve {"name": ...}` or
+`POST /extensions/deny {"name": ...}`. Approval is for that exact version: if the source changes after the request, approving
+is refused and the new version needs its own request. A version approved once starts again after a restart without asking.
+
 ## Trust
 
 At startup, Extensions installs again what was installed, and installs new folders only from sources marked
@@ -88,6 +112,7 @@ next start through the same checks.
 
 - `GET /extensions`: what is installed, its state, and folders not installed yet.
 - `<home>/extensions-ledger.jsonl`: every install, update, refusal, restore and removal, with the version's digest.
+- `GET /events`: the same changes as a live stream (server-sent events): `tasks/changed` and `extensions/changed`, as they happen.
 - `GET /tasks`: every agent run as a durable task, owning one task per tool call; `POST /tasks/cancel { id }`.
 
 Node keeps every module version it has loaded, so memory grows a little with each update until the app restarts.
